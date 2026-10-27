@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5efff">
+  <title>ตัวการ์ตูน 3D AR</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, sans-serif; color:#241b35; background:linear-gradient(160deg,#f7f0ff,#edf7ff); }
+    main { max-width:760px; margin:auto; padding:22px 16px 36px; text-align:center; }
+    h1 { font-size:clamp(1.45rem,4vw,2rem); margin:8px 0; }
+    p { line-height:1.55; }
+    .sub { color:#625873; margin:0 auto 16px; max-width:520px; }
+    model-viewer { display:block; width:100%; height:min(64vh,560px); min-height:360px; border-radius:24px; background:rgba(255,255,255,.65); --poster-color: transparent; }
+    .actions { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:16px 0; }
+    button, .button { border:0; border-radius:999px; padding:13px 19px; font-size:1rem; font-weight:650; cursor:pointer; text-decoration:none; }
+    .primary { background:#6d42c7; color:white; }
+    .secondary { background:white; color:#39265c; border:1px solid #ddd2ef; }
+    .note { text-align:left; background:rgba(255,255,255,.8); padding:14px 16px; border-radius:16px; font-size:.94rem; }
+    code { overflow-wrap:anywhere; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>✨ ตัวการ์ตูน 3D ในโลกจริง</h1>
+  <p class="sub">ลองหมุนดูตัวอย่าง แล้วกดปุ่ม AR บนโทรศัพท์ Android เพื่อวางโมเดลบนพื้นหรือโต๊ะ</p>
+
+  <!-- DEMO MODEL: เปลี่ยน src เป็น URL ไฟล์ GLB ของตัวการ์ตูนที่มี animation -->
+  <model-viewer id="model"
+    src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
+    alt="ตัวอย่างหุ่นยนต์ 3 มิติ"
+    ar ar-modes="scene-viewer webxr"
+    ar-placement="floor"
+    camera-controls
+    autoplay
+    shadow-intensity="1"
+    exposure="1"
+    environment-image="neutral">
+  </model-viewer>
+
+  <div class="actions">
+    <button class="primary" id="arButton">เปิดประสบการณ์ AR</button>
+    <button class="secondary" id="animButton">เล่นแอนิเมชัน</button>
+  </div>
+  <p id="status" role="status">โมเดลนี้เป็นหุ่นยนต์ตัวอย่าง 3D เพื่อทดสอบระบบ</p>
+
+  <section class="note">
+    <strong>วิธีใช้</strong>
+    <ol>
+      <li>เปิดหน้านี้บน Android ผ่าน Chrome</li>
+      <li>กด “เปิดประสบการณ์ AR” และอนุญาตใช้กล้อง</li>
+      <li>ขยับโทรศัพท์ช้า ๆ ให้ระบบตรวจจับพื้น แล้วแตะหน้าจอเพื่อวางโมเดล</li>
+    </ol>
+    <strong>หมายเหตุ:</strong> ไฟล์นี้ใช้โมเดลหุ่นยนต์ตัวอย่างที่มีแอนิเมชัน ไม่ใช่ตัวการ์ตูนที่ออกแบบเฉพาะ และ AR ต้องทำงานผ่านเว็บไซต์ HTTPS บนอุปกรณ์ที่รองรับ ARCore/Scene Viewer
+  </section>
+</main>
+<script>
+  const viewer = document.querySelector('#model');
+  const status = document.querySelector('#status');
+  document.querySelector('#arButton').addEventListener('click', async () => {
+    try {
+      if (viewer.canActivateAR) {
+        await viewer.activateAR();
+      } else {
+        status.textContent = 'อุปกรณ์หรือเบราว์เซอร์นี้ยังไม่พร้อมใช้งาน AR กรุณาใช้ Android ที่รองรับ ARCore และ Chrome';
+      }
+    } catch (e) {
+      status.textContent = 'เปิด AR ไม่สำเร็จ ลองเปิดด้วย Chrome ผ่าน HTTPS และตรวจสอบการอนุญาตกล้อง';
+    }
+  });
+  document.querySelector('#animButton').addEventListener('click', () => {
+    if (viewer.availableAnimations && viewer.availableAnimations.length) {
+      viewer.animationName = viewer.availableAnimations[0];
+      viewer.play();
+      status.textContent = 'กำลังเล่นแอนิเมชัน: ' + viewer.animationName;
+    } else {
+      status.textContent = 'โมเดลนี้ไม่มีแอนิเมชันที่ตรวจพบ';
+    }
+  });
+  viewer.addEventListener('load', () => {
+    status.textContent = viewer.availableAnimations?.length
+      ? 'พร้อมทดลองแล้ว • แอนิเมชัน: ' + viewer.availableAnimations.join(', ')
+      : 'โมเดลโหลดแล้ว พร้อมทดลองดู 3D';
+  });
+  viewer.addEventListener('error', () => {
+    status.textContent = 'โหลดโมเดลไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตหรือ URL โมเดล';
+  });
+</script>
+</body>
+</html>
